@@ -44,7 +44,7 @@ outputs:
     description: "Proof page of this repository (all sealed releases)."
     value: ${{ steps.seal.outputs.repo-page-url }}
   badge-url:
-    description: "SVG badge of this repository (latest seal)."
+    description: "Large SVG seal of this repository (latest seal). Compact badge: same path with badge.svg."
     value: ${{ steps.seal.outputs.badge-url }}
   badge-markdown:
     description: "Markdown snippet for the README."

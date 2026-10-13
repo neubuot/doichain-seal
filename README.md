@@ -1,6 +1,6 @@
 # Doichain Seal
 
-[![Doichain Seal](https://doi-api.sendlabs.de/seal/github/neubuot/doichain-seal/badge.svg)](https://doi-api.sendlabs.de/seal/github/neubuot/doichain-seal)
+[![Doichain Seal](https://doi-api.sendlabs.de/seal/github/neubuot/doichain-seal/seal.svg)](https://doi-api.sendlabs.de/seal/github/neubuot/doichain-seal)
 
 A GitHub Action that gives every release a **tamper-evident timestamp on the Doichain blockchain**.
 It computes the SHA-256 of your release files and anchors it on chain, together with repository, tag and commit.
@@ -8,7 +8,7 @@ Anyone can later check that a download is exactly the file you published, and si
 
 - **No account, no wallet, no secrets.** The job proves its identity with the GitHub OIDC token it already has.
 - **Public proof.** The seal is a name `poe/<sha256>` on the public Doichain blockchain. It can be verified with any Doichain node, with the [Doichain API](https://doi-api.sendlabs.de/docs), with [Verifile](https://verifile.it/) or via the [Doichain MCP server](https://doi-api.sendlabs.de/mcp). If this service disappears, the proof stays.
-- **A badge for your README** that shows the latest sealed release and its block, and a proof page per repository and per file.
+- **A seal for your README** that shows the latest sealed release, its block and date (large card or compact badge), and a proof page per repository and per file.
 - **Free.** DOI Labs pays the chain fees. 20 seals per repository and day, 300 per day for everyone.
 
 [Proof page example](https://doi-api.sendlabs.de/seal) · [How it works](https://doi-api.sendlabs.de/seal#how) · [Deutsche Fassung](README.de.md)
@@ -38,10 +38,10 @@ jobs:
             SHA256SUMS
 ```
 
-Then add the badge to your README (the action prints the exact snippet in the job summary):
+Then add the seal to your README (the action prints the exact snippet in the job summary). The large seal shows tag, block and date, a compact badge is available as `badge.svg`:
 
 ```markdown
-[![Doichain Seal](https://doi-api.sendlabs.de/seal/github/OWNER/REPO/badge.svg)](https://doi-api.sendlabs.de/seal/github/OWNER/REPO)
+[![Doichain Seal](https://doi-api.sendlabs.de/seal/github/OWNER/REPO/seal.svg)](https://doi-api.sendlabs.de/seal/github/OWNER/REPO)
 ```
 
 ### Inputs
@@ -62,7 +62,7 @@ Then add the badge to your README (the action prints the exact snippet in the jo
 | `results` | JSON array, one object per file: `file`, `size`, `hash`, `status` (`anchored`, `already_anchored`, `confirmed`, `failed`), `txid`, `proof_url`, `badge_url`. |
 | `sealed` / `failed` | Number of sealed and failed files. |
 | `repo-page-url` | Proof page of the repository. |
-| `badge-url` | SVG badge of the repository (latest seal). |
+| `badge-url` | Large SVG seal of the repository (latest seal). The compact badge is the same path with `badge.svg`. |
 | `badge-markdown` | Ready-to-paste README snippet. |
 
 ## What the seal proves

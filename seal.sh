@@ -103,8 +103,8 @@ for file in "${FILES[@]}"; do
   esac
   if [ -z "$REPO_PAGE" ] && [ "$status" != "failed" ]; then
     REPO_PAGE=$(echo "$json" | jq -r '.repo_page_url // empty')
-    BADGE=$(echo "$json" | jq -r '.repo_badge_url // empty')
-    BADGE_MD=$(echo "$json" | jq -r '.badge_markdown // empty')
+    BADGE=$(echo "$json" | jq -r '.repo_badge_url // empty' | sed 's#/badge\.svg$#/seal.svg#')
+    BADGE_MD=$(echo "$json" | jq -r '.badge_markdown // empty' | sed 's#/badge\.svg)#/seal.svg)#')
   fi
   RESULTS=$(echo "$RESULTS" | jq -c --arg f "$file" --argjson s "$size" --arg h "$hash" --arg st "$status" --arg t "$txid" --arg p "$proof" --arg b "$API/seal/$hash/badge.svg" \
     '. + [{file:$f, size:$s, hash:$h, status:$st, txid:$t, proof_url:$p, badge_url:$b}]')
@@ -113,7 +113,7 @@ done
 # Fallback links when nothing could be sealed (repository is known from the runner).
 if [ -z "$REPO_PAGE" ]; then
   REPO_PAGE="$API/seal/github/${GITHUB_REPOSITORY:-owner/repo}"
-  BADGE="$REPO_PAGE/badge.svg"
+  BADGE="$REPO_PAGE/seal.svg"
   BADGE_MD="[![Doichain Seal]($BADGE)]($REPO_PAGE)"
 fi
 
@@ -154,7 +154,7 @@ if [ "$WRITE_SUMMARY" = "true" ] && [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     echo "|---|---|---|---|"
     echo "$RESULTS" | jq -r '.[] | "| `\(.file)` | `\(.hash[0:16])…` | \(.status) | [open](\(.proof_url)) |"'
     echo
-    echo "Add the badge to your README:"
+    echo "Add the seal to your README (compact variant: replace seal.svg with badge.svg):"
     echo
     echo '```markdown'
     echo "$BADGE_MD"
