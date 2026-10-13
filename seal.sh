@@ -11,6 +11,8 @@ WAIT="${INPUT_WAIT:-0}"
 FAIL_ON_ERROR="${INPUT_FAIL_ON_ERROR:-true}"
 WRITE_SUMMARY="${INPUT_SUMMARY:-true}"
 NOTE="${INPUT_NOTE:-}"
+RETRY="${INPUT_RETRY:-1}"
+RETRY_WAIT=600
 
 log()  { echo "$*"; }
 warn() { echo "::warning::$*"; }
@@ -78,11 +80,23 @@ for file in "${FILES[@]}"; do
   if [ $(( $(date +%s) - TOKEN_AT )) -gt 240 ]; then TOKEN=$(get_token); TOKEN_AT=$(date +%s); fi
   body=$(jq -cn --arg h "$hash" --arg f "${name:0:80}" --argjson s "$size" --arg n "${NOTE:0:60}" \
     '{hash:$h, filename:$f, size:$s} + (if $n != "" then {note:$n} else {} end)')
-  response=$(curl -sS --retry 2 --retry-delay 3 -w '\n%{http_code}' -X POST "$API/v1/seal/github" \
-    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -H "User-Agent: doichain-seal-action" \
-    --data "$body") || { response=$'\n000'; }
-  code="${response##*$'\n'}"
-  json="${response%$'\n'*}"
+  attempt=0
+  while :; do
+    response=$(curl -sS --retry 2 --retry-delay 3 -w '\n%{http_code}' -X POST "$API/v1/seal/github" \
+      -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -H "User-Agent: doichain-seal-action" \
+      --data "$body") || { response=$'\n000'; }
+    code="${response##*$'\n'}"
+    json="${response%$'\n'*}"
+    # 503: the service waits for the next block (chain limit). Retry after Retry-After seconds, at most RETRY times.
+    if [ "$code" = "503" ] && [ "$attempt" -lt "$RETRY" ]; then
+      attempt=$((attempt + 1))
+      log "… service busy (waiting for the next Doichain block), retry $attempt/$RETRY in ${RETRY_WAIT}s"
+      sleep "$RETRY_WAIT"
+      if [ $(( $(date +%s) - TOKEN_AT )) -gt 240 ]; then TOKEN=$(get_token); TOKEN_AT=$(date +%s); fi
+      continue
+    fi
+    break
+  done
   case "$code" in
     201)
       txid=$(echo "$json" | jq -r '.anchoring.txid // empty')

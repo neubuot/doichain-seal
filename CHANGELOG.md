@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 (2026-10-13)
+
+New input `retry` (default 1): when the seal service answers 503 because too many seals wait for the next Doichain block, the action waits 10 minutes and tries again.
+
 ## 1.0.1 (2026-10-13)
 
 README badge and job summary use the large seal (`seal.svg`), the compact badge stays available as `badge.svg`.

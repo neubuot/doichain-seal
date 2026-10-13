@@ -52,6 +52,7 @@ Then add the seal to your README (the action prints the exact snippet in the job
 | `api-url` | `https://doi-api.sendlabs.de` | Base URL of the Doichain API that runs the seal service. |
 | `note` | | Optional note, stored publicly on the chain (at most 60 characters). |
 | `wait` | `0` | Seconds to wait for the first confirmation. A block arrives about every 10 minutes, so `900` is a sensible value if you need the block height inside the workflow. |
+| `retry` | `1` | Retries when the seal service waits for the next Doichain block (HTTP 503). The node accepts about 25 chained seals per block, so a busy service asks you to come back in 10 minutes. Each retry waits 10 minutes. |
 | `fail-on-error` | `true` | Fail the step when a file cannot be sealed, or only warn. |
 | `summary` | `true` | Write a job summary with proof links and the badge snippet. |
 

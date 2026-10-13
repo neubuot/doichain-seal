@@ -21,6 +21,10 @@ inputs:
     description: "Seconds to wait for the first confirmation (0 = do not wait). A Doichain block arrives about every 10 minutes."
     required: false
     default: "0"
+  retry:
+    description: "How often to retry when the seal service waits for the next Doichain block (HTTP 503, about 10 minutes per retry). 0 disables retries."
+    required: false
+    default: "1"
   fail-on-error:
     description: "Fail the step when a file cannot be sealed (true) or only print a warning (false)."
     required: false
@@ -60,6 +64,7 @@ runs:
         INPUT_API_URL: ${{ inputs.api-url }}
         INPUT_NOTE: ${{ inputs.note }}
         INPUT_WAIT: ${{ inputs.wait }}
+        INPUT_RETRY: ${{ inputs.retry }}
         INPUT_FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
         INPUT_SUMMARY: ${{ inputs.summary }}
       run: bash "${{ github.action_path }}/seal.sh"
