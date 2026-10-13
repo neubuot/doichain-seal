@@ -24,7 +24,7 @@ inputs:
   retry:
     description: "How often to retry when the seal service waits for the next Doichain block (HTTP 503, about 10 minutes per retry). 0 disables retries."
     required: false
-    default: "1"
+    default: "2"
   fail-on-error:
     description: "Fail the step when a file cannot be sealed (true) or only print a warning (false)."
     required: false
