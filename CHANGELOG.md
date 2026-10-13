@@ -1,0 +1,5 @@
+# Changelog
+
+## 1.0.0 (2026-10-13)
+
+First release. Composite action that seals release files on the Doichain via `POST /v1/seal/github` of the Doichain API, authenticated with the GitHub OIDC token of the job. Inputs `files`, `api-url`, `note`, `wait`, `fail-on-error`, `summary`. Outputs `results`, `sealed`, `failed`, `repo-page-url`, `badge-url`, `badge-markdown`. Job summary with proof links and README badge.

@@ -1,0 +1,65 @@
+name: "Doichain Seal"
+description: "Tamper-evident timestamps for your release files on the Doichain blockchain. Carries repository, tag and commit. No account, no wallet, no secrets."
+author: "DOI Labs"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  files:
+    description: "Files to seal, one glob per line (for example dist/* or SHA256SUMS). Directories are skipped."
+    required: true
+  api-url:
+    description: "Base URL of the Doichain API that runs the seal service."
+    required: false
+    default: "https://doi-api.sendlabs.de"
+  note:
+    description: "Optional note stored publicly on the chain together with the seal (at most 60 characters)."
+    required: false
+    default: ""
+  wait:
+    description: "Seconds to wait for the first confirmation (0 = do not wait). A Doichain block arrives about every 10 minutes."
+    required: false
+    default: "0"
+  fail-on-error:
+    description: "Fail the step when a file cannot be sealed (true) or only print a warning (false)."
+    required: false
+    default: "true"
+  summary:
+    description: "Write a job summary with proof links and the README badge."
+    required: false
+    default: "true"
+
+outputs:
+  results:
+    description: "JSON array with one object per file: file, size, hash, status, txid, proof_url, badge_url."
+    value: ${{ steps.seal.outputs.results }}
+  sealed:
+    description: "Number of files that were sealed in this run or were already sealed."
+    value: ${{ steps.seal.outputs.sealed }}
+  failed:
+    description: "Number of files that could not be sealed."
+    value: ${{ steps.seal.outputs.failed }}
+  repo-page-url:
+    description: "Proof page of this repository (all sealed releases)."
+    value: ${{ steps.seal.outputs.repo-page-url }}
+  badge-url:
+    description: "SVG badge of this repository (latest seal)."
+    value: ${{ steps.seal.outputs.badge-url }}
+  badge-markdown:
+    description: "Markdown snippet for the README."
+    value: ${{ steps.seal.outputs.badge-markdown }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: seal
+      shell: bash
+      env:
+        INPUT_FILES: ${{ inputs.files }}
+        INPUT_API_URL: ${{ inputs.api-url }}
+        INPUT_NOTE: ${{ inputs.note }}
+        INPUT_WAIT: ${{ inputs.wait }}
+        INPUT_FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+        INPUT_SUMMARY: ${{ inputs.summary }}
+      run: bash "${{ github.action_path }}/seal.sh"

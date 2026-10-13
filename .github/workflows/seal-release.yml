@@ -1,0 +1,46 @@
+# Seals this action's own releases: packs the tagged source tree, attaches it to the GitHub release
+# and anchors its SHA-256 in the Doichain. Serves as the live test of the action.
+name: Seal release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write     # upload the archive to the release
+  id-token: write     # OIDC token for the seal service
+
+jobs:
+  seal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pack the source tree
+        id: pack
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          name="doichain-seal-${tag}.tar.gz"
+          git archive --format=tar.gz --prefix="doichain-seal-${tag}/" -o "$name" HEAD
+          sha256sum "$name" > SHA256SUMS
+          echo "archive=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Seal the archive
+        id: seal
+        uses: ./
+        with:
+          files: |
+            ${{ steps.pack.outputs.archive }}
+            SHA256SUMS
+
+      - name: Attach the archive to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" "${{ steps.pack.outputs.archive }}" SHA256SUMS --clobber
+
+      - name: Show results
+        run: |
+          echo '${{ steps.seal.outputs.results }}' | jq .
+          echo "Repository page: ${{ steps.seal.outputs.repo-page-url }}"
